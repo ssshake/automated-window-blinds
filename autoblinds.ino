@@ -56,7 +56,7 @@ void loop(void) {
       state=4;
     } 
     else {
-        debug and Serial.println(" - No reading");      
+        debug and Serial.println("No reading");      
     }
     
 
@@ -92,8 +92,8 @@ void loop(void) {
                   debug and Serial.println(pos);
               } 
         }
-        myservo.write(pos);
-        delay(spd);
+        myservo.write(pos); // Doing a write out side of the loop because I had a feeling the last position value was being skipped. I think I'm wrong though
+        delay(spd); 
         myservo.detach();
     }
     prevstate = state; //Remember state so we can compare it again next round
