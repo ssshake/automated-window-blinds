@@ -36,23 +36,23 @@ void loop(void) {
     //Define the modes based on how bright it is, and set corresponding servo position
     if (photocellReading < 400) {
         debug and Serial.println("Night");
-      dest=0;      
+      dest=180;      
       state=1;
     } 
     else if (photocellReading < 500) {
         debug and Serial.println("Dusk");
-      dest=45;      
+      dest=135;      
       state=2;           
     } 
     else if (photocellReading < 700) {
         debug and Serial.println("Day");
-      dest=95;
+      dest=85;
       state=3;
       
     } 
     else if (photocellReading < 1023) {
         debug and Serial.println("Very Hot out");
-      dest=160;
+      dest=20;
       state=4;
     } 
     else {
