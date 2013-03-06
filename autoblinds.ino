@@ -51,7 +51,7 @@ void loop(void) {
       
     } 
     else if (photocellReading < 1023) {
-        debug and Serial.println("Very Hot out");
+        debug and Serial.println("Very Bright Day");
       dest=20;
       state=4;
     } 
