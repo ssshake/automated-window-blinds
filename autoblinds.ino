@@ -18,9 +18,9 @@ int photocellReading; // the analog reading from the analog resistor divider
 int state = 0; //Keep track of state so we don't send signal to the servo without readon, better on battery life
 int prevstate = 0;
 
-int debug = 1; //Set this to 1 for serial debug output
+int debug = 0; //Set this to 1 for serial debug output
 void setup(void) {
-    Serial.begin(9600); //Comment out this line if you don't want debugging enabled
+//    Serial.begin(9600); //Comment out this line if you don't want debugging enabled
 }
 
 
@@ -39,12 +39,12 @@ void loop(void) {
       dest=180;      
       state=1;
     } 
-    else if (photocellReading < 500) {
+    else if (photocellReading < 600) {
         debug and Serial.println("Dusk");
       dest=135;      
       state=2;           
     } 
-    else if (photocellReading < 700) {
+    else if (photocellReading < 950) {
         debug and Serial.println("Day");
       dest=85;
       state=3;
