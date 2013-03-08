@@ -3,7 +3,6 @@
 //It will sample a photocell (light dependant resistor) and depending on the level of brightness act accordingly
 //This script can also be used with a tmp36 temperature sensor to tilt up when it's very hot out
 //Currently it will tilt up when it's very bright out, but ideally we want this do be done by temperature.
-//Written by Ssshake - Contact arduinocode@doobiest.net for help or to submit contributes to the code line.
 #include <Servo.h>  
 Servo myservo;  // create servo object to control a servo 
                 // a maximum of eight servo objects can be created 
