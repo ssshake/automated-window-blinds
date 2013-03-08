@@ -3,10 +3,11 @@
 //It will sample a photocell (light dependant resistor) and depending on the level of brightness act accordingly
 //This script can also be used with a tmp36 temperature sensor to tilt up when it's very hot out
 //Currently it will tilt up when it's very bright out, but ideally we want this do be done by temperature.
+//Written by Ssshake - Contact arduinocode@doobiest.net for help or to submit contributes to the code line.
 #include <Servo.h>  
 Servo myservo;  // create servo object to control a servo 
                 // a maximum of eight servo objects can be created 
-int pos = 0;    // variable to store the servo position 
+int pos = 180;    // variable to store the servo position 
 int dest = 0;   // Servo destination depending on photocell reading
 int spd = 50;   // how fast should the servo move? 50 is quier
 
@@ -138,16 +139,27 @@ void ldr_press() {
 //I have a feeling this whole section isn't require
 // I think you can just call ldr_presses where you do button_pressed because the photocell doesnt actually get polled in ldr_press
 // So you can have slow movement probalby using the same logic or copying it.
-//
-
 //While holding a position/threshold, poll button for status.
 void button_press(){
- 
-	button_value = digitalRead(button_pin);
-	photocellReading=analogRead(photocellPin);
   
+  
+   //is this necessary??
+    button_value = digitalRead(button_pin);
+	photocellReading = analogRead(photocellPin); //Query photo cell
+		  debug and Serial.print("Light Reading :");
+		  debug and Serial.print(photocellReading); // the raw analog reading
+		  debug and Serial.print(" | Position: ");
+		  debug and Serial.print(pos);    
+		  debug and Serial.println(" | State: ");
+
     //Define the modes based on button press. Cycle through options
     if(button_value==HIGH){  // button press
+    
+      //THIS MIGHT WORK?
+      //ldr_press();
+    
+      //INSTEAD OF THIS...
+      
         myservo.attach(9); //connect to servo
 			debug and Serial.println("button press"); 
 			
@@ -185,7 +197,8 @@ void button_press(){
 		delay(2000);	//Since we're moving the servo from one end of the 180 degree chart to another in one shot we need to give it time to get there before moving on
 		myservo.detach();  //Detach servo, because if servo is say destined for 80 degrees, but to much weight/lack of torque keeps it hovering at 79-79.5 degrees, the motor will keep trying and humm
 							// detaching shuts the motor off, thus making it rest at 79 degrees instead of trying too hard.
-	}		
+       
+    }		
 }
 
 
