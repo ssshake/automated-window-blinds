@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Fritzing Bill of Materials</title>
+<title>Automated Window Blinds - Bill of Materials</title>
 <style type="text/css">
 .meta {
 	font-size: small;
@@ -29,8 +29,7 @@ td {
 
 <body>
 <h1>Bill of Materials: Autoblinds-dia-0.3.fzz</h1>
-<p class="meta">Y:/doobiest/git/arduino/Autoblinds-dia-0.3.fzz</p>
-<p class="meta">Friday, March 15 2013, 22:56:43</p>
+<p class="meta">Saturday, March 16 2013, 00:27:13</p>
 
 <h2>Assembly List</h2>
 <table>
@@ -48,41 +47,41 @@ td {
     <td>DIP-Relay-D31A</td>
     <td class="props">pins 8; part # 12v Relay Stich</td>
 </tr><tr>
-    <td>Arduino2</td>
+    <td>Arduino Uno</td>
     <td>Arduino</td>
     <td class="props">processor ATmega; variant Arduino UNO R3</td>
 </tr><tr>
-    <td>J1</td>
-    <td>Infrared Proximity Sensor</td>
-    <td class="props"></td>
-</tr><tr>
-    <td>J2</td>
-    <td>Basic Servo</td>
-    <td class="props"></td>
-</tr><tr>
-    <td>R1</td>
-    <td>Photocell (LDR)</td>
-    <td class="props">package THT; resistance@ dark 300 kOhms@ 10 seconds; resistance@ luminance 16 kOhms@ 10 lux</td>
-</tr><tr>
-    <td>R2</td>
-    <td>10k Ω Resistor</td>
-    <td class="props">package THT; tolerance ±5%; bands 4; resistance 10kΩ; pin spacing 400 mil</td>
-</tr><tr>
-    <td>R3</td>
-    <td>4.7k Ω Resistor</td>
-    <td class="props">package THT; tolerance ±5%; bands 4; resistance 4.7kΩ; pin spacing 400 mil</td>
-</tr><tr>
-    <td>R4</td>
+    <td>IR Emitter Resistor</td>
     <td>100 Ω Resistor</td>
     <td class="props">package THT; tolerance ±5%; bands 4; resistance 100Ω; pin spacing 400 mil</td>
 </tr><tr>
-    <td>S1</td>
+    <td>IR Sensor Resistor</td>
+    <td>4.7k Ω Resistor</td>
+    <td class="props">package THT; tolerance ±5%; bands 4; resistance 4.7kΩ; pin spacing 400 mil</td>
+</tr><tr>
+    <td>Kill Switch</td>
+    <td>Toggle Switch</td>
+    <td class="props">package THT; switching circuit SPDT</td>
+</tr><tr>
+    <td>Light Sensor</td>
+    <td>Photocell (LDR)</td>
+    <td class="props">package THT; resistance@ dark 300 kOhms@ 10 seconds; resistance@ luminance 16 kOhms@ 10 lux</td>
+</tr><tr>
+    <td>Manual Mode</td>
     <td>Pushbutton</td>
     <td class="props">package [THT]</td>
 </tr><tr>
-    <td>S2</td>
-    <td>Toggle Switch</td>
-    <td class="props">package THT; switching circuit SPDT</td>
+    <td>Motion Sensor</td>
+    <td>Infrared Proximity Sensor</td>
+    <td class="props"></td>
+</tr><tr>
+    <td>Photocell PullDown Resistor</td>
+    <td>10k Ω Resistor</td>
+    <td class="props">package THT; tolerance ±5%; bands 4; resistance 10kΩ; pin spacing 400 mil</td>
+</tr><tr>
+    <td>Window Blinds Servo</td>
+    <td>Basic Servo</td>
+    <td class="props">part # Futaba S3003</td>
 </tr>
   </tbody>
 </table>
@@ -106,36 +105,36 @@ td {
     <td class="props">processor ATmega; variant Arduino UNO R3</td>
 </tr><tr>
     <td>1</td>
-    <td>Infrared Proximity Sensor</td>
-    <td class="props"></td>
-</tr><tr>
-    <td>1</td>
-    <td>Basic Servo</td>
-    <td class="props"></td>
-</tr><tr>
-    <td>1</td>
-    <td>Photocell (LDR)</td>
-    <td class="props">package THT; resistance@ dark 300 kOhms@ 10 seconds; resistance@ luminance 16 kOhms@ 10 lux</td>
-</tr><tr>
-    <td>1</td>
-    <td>10k Ω Resistor</td>
-    <td class="props">package THT; tolerance ±5%; bands 4; resistance 10kΩ; pin spacing 400 mil</td>
+    <td>100 Ω Resistor</td>
+    <td class="props">package THT; tolerance ±5%; bands 4; resistance 100Ω; pin spacing 400 mil</td>
 </tr><tr>
     <td>1</td>
     <td>4.7k Ω Resistor</td>
     <td class="props">package THT; tolerance ±5%; bands 4; resistance 4.7kΩ; pin spacing 400 mil</td>
 </tr><tr>
     <td>1</td>
-    <td>100 Ω Resistor</td>
-    <td class="props">package THT; tolerance ±5%; bands 4; resistance 100Ω; pin spacing 400 mil</td>
+    <td>Toggle Switch</td>
+    <td class="props">package THT; switching circuit SPDT</td>
+</tr><tr>
+    <td>1</td>
+    <td>Photocell (LDR)</td>
+    <td class="props">package THT; resistance@ dark 300 kOhms@ 10 seconds; resistance@ luminance 16 kOhms@ 10 lux</td>
 </tr><tr>
     <td>1</td>
     <td>Pushbutton</td>
     <td class="props">package [THT]</td>
 </tr><tr>
     <td>1</td>
-    <td>Toggle Switch</td>
-    <td class="props">package THT; switching circuit SPDT</td>
+    <td>Infrared Proximity Sensor</td>
+    <td class="props"></td>
+</tr><tr>
+    <td>1</td>
+    <td>10k Ω Resistor</td>
+    <td class="props">package THT; tolerance ±5%; bands 4; resistance 10kΩ; pin spacing 400 mil</td>
+</tr><tr>
+    <td>1</td>
+    <td>Basic Servo</td>
+    <td class="props">part # Futaba S3003</td>
 </tr>
   </tbody>
 </table>
