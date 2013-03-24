@@ -33,9 +33,9 @@ int sensorValue = 0;  // variable to store the value coming from the sensor
 int dest = 0;   // Servo destination depending on photocell reading
 int buttonpos =1; //Keep state of motion sensor/button for movement
 //ENABLE DEBUG
-int debug = 1; //Set this to 1 for serial debug output
+int debug = 0; //Set this to 1 for serial debug output
 void setup(void) {
-   // Serial.begin(9600); //Comment out this line if you don't want debugging enabled
+   //Serial.begin(9600); //Comment out this line if you don't want debugging enabled
     
     myservo.attach(servoPin); 
     //pinMode(ledPin, OUTPUT);
@@ -50,16 +50,16 @@ killswitch_value = digitalRead(killswitch);
 if(killswitch_value==HIGH) //IF kill switch isn't set then run main loop
 	{  
 		photocellReading = analogRead(photocellPin); //Query photo cell
-		  debug and Serial.print("Light Reading :");
-		  debug and Serial.print(photocellReading); // the raw analog reading
-		  debug and Serial.print(" | Pos: ");
-		  debug and Serial.print(pos);    
-		  debug and Serial.print(" | State: ");
+		//  debug and Serial.print("Light Reading :");
+		 // debug and Serial.print(photocellReading); // the raw analog reading
+		  //debug and Serial.print(" | Pos: ");
+		  //debug and Serial.print(pos);    
+		  //debug and Serial.print(" | State: ");
 
 		//Define the modes based on how bright it is, and set corresponding servo position
 		if (photocellReading > 0 && photocellReading < 400) {
 				button_press();	
-					debug and Serial.println("Night");
+//					debug and Serial.println("Night");
 				dest=180;      
 				state=1;
 		}  
@@ -67,32 +67,35 @@ if(killswitch_value==HIGH) //IF kill switch isn't set then run main loop
 		//After setting LDR position, hold until not longer within current threshold  
 		else if ( photocellReading > 410 && photocellReading < 600) {
 				button_press();	    
-					debug and Serial.println("Dusk");
+//					debug and Serial.println("Dusk");
 				dest=135;      
 				state=2; 
 		}
 
 		//After setting LDR position, hold until not longer within current threshold  
-		else if (photocellReading > 610 && photocellReading < 950) {
+		else if (photocellReading > 610 && photocellReading < 940) {
 				button_press();	      
-					debug and Serial.println("Day");
-				dest=85;
+//					debug and Serial.println("Day");
+				dest=105;
 				state=3;
 		}
 
 		//After setting LDR position, hold until not longer within current threshold	
-		else if (photocellReading > 960 && photocellReading < 1023) {
+		else if (photocellReading > 950 && photocellReading < 1023) {
 				button_press();	
-					  debug and Serial.println("Very Bright Day");
+//					  debug and Serial.println("Very Bright Day");
 				dest=20;
 				state=4;
 		} 
 		else {
-			debug and Serial.println(photocellReading);	
-			debug and Serial.println("Not in range");	
+//			debug and Serial.println(photocellReading);	
+//			debug and Serial.println("Not in range");	
+			button_press();	 
 		}
 		
 		if (state != prevstate){ //IF the photocell reading is different from last sample then execute servo controls
+                        debug and Serial.print("State Change to ");
+                        debug and Serial.println(state);
 			ldr_press();
 	 	}
 		prevstate = state; //Remember state so we can compare it again next round
@@ -100,7 +103,7 @@ if(killswitch_value==HIGH) //IF kill switch isn't set then run main loop
 else
 	{
 		debug and Serial.println("Kill Switch");
-		delay(1000);
+		delay(4000);
 	}
 }
 
@@ -144,81 +147,59 @@ void button_press(){
 
     sensorValue = analogRead(sensorPin);   //Query motion sensor
     button_value = digitalRead(button_pin); //Query button or relay switch
-	//Delete below?
-    //photocellReading = analogRead(photocellPin); //Query photo cell
-	//	  debug and Serial.print("Light Reading :");
-	//	  debug and Serial.print(photocellReading); // the raw analog reading
-	//	  debug and Serial.print(" | Position: ");
-	//	  debug and Serial.print(pos);    
-	//	  debug and Serial.println(" | State: ");
-                debug and Serial.print("Motion Sensor Value: ");
-                 debug and Serial.println(sensorValue);
+//                 debug and Serial.print("Motion Sensor Value: ");
+ //                debug and Serial.println(sensorValue);
                  
                  
     //Define the modes based on button press. Cycle through options
     if(button_value==LOW || sensorValue < 900){  // button press
-//    if(button_value==LOW ){  // button press
-        //analogWrite(ledPin, sensorValue/4);  
-        myservo.attach(9); //connect to servo
-			debug and Serial.println("button press"); 
-			debug and Serial.println(sensorValue);
-		if (pos <= 20) { //20 degrees is pointing up. go down a bit.
-			dest=85;		//new dest is lower than prev dest (servo arrangement is 180 is fully down an 0 is fully up in other words backwards for what youd expect
-			myservo.write(dest);	//Move to next position
-			pos=dest;				//set position status to what we just moved it o
+        spd=10;   // how fast should the servo move? 50 is quie
+	debug and Serial.println("button press"); 
+	debug and Serial.println(sensorValue);
+
+		if (pos <= 20) { //0 degrees closed upward.
+			dest=105;		//new dest is lower than prev dest (servo arrangement is 180 is fully down an 0 is fully up in other words backwards for what youd expect
                         buttonpos=0;
 				debug and Serial.print(dest);
-				debug and Serial.println(" - Day");
+				debug and Serial.println(" Degree");
 		} 
-		
 
+                		else if (pos <= 105  && buttonpos == 0 ) { //move to next position
+                			dest=135;
+                				debug and Serial.print(dest);
+				debug and Serial.println(" Degree");
+                	    	} 
+                		
+                		else if (pos <= 135  && buttonpos == 0 ) {//move to next position
+                			dest=180;      
+                				debug and Serial.print(dest);				  	  
+				debug and Serial.println(" Degree");
+                		} 
+                		
+              
 
-
-		else if (pos <= 85  && buttonpos == 0 ) { //move to next position
-			dest=135;
-			myservo.write(dest);
-			pos=dest;
-				debug and Serial.print(dest);
-				debug and Serial.println(" - Dusk");
-		} 
-		
-		else if (pos <= 135  && buttonpos == 0 ) {//move to next position
-			dest=180;      
-			myservo.write(dest);          
-			pos=dest;
-				debug and Serial.print(dest);				  	  
-				debug and Serial.println(" - Night");		
-		} 
-		
-
-		else if (pos <= 85  && buttonpos == 1 ) { //move to next position
-			dest=20;
-			myservo.write(dest);
-			pos=dest;
-				debug and Serial.print(dest);
-				debug and Serial.println(" - Dusk");
-		} 
-		
-		else if (pos <= 135  && buttonpos == 1) {//move to next position
-			dest=85;      
-			myservo.write(dest);          
-			pos=dest;
-				debug and Serial.print(dest);				  	  
-				debug and Serial.println(" - Night");		
-		} 
+                		else if (pos <= 105  && buttonpos == 1 ) { //move to next position
+                			dest=20;
+                				debug and Serial.print(dest);
+				debug and Serial.println(" Degree");
+                		} 
+                		
+                		else if (pos <= 135  && buttonpos == 1) {//move to next position
+                			dest=105;      
+                				debug and Serial.print(dest);				  	  
+				debug and Serial.println(" Degree");
+                		} 
 
 
 		else if (pos <= 180) {//move to next position
 			dest=135;   
-			myservo.write(dest);
-			pos=dest;
                         buttonpos=1;
 				debug and Serial.print(dest);
-				debug and Serial.println(" - Bright");		
+				debug and Serial.println(" Degree");
 		} 
-		delay(500);	//Since we're moving the servo from one end of the 180 degree chart to another in one shot we need to give it time to get there before moving on
-		myservo.detach();  //Detach servo, because if servo is say destined for 80 degrees, but to much weight/lack of torque keeps it hovering at 79-79.5 degrees, the motor will keep trying and humm
-							// detaching shuts the motor off, thus making it rest at 79 degrees instead of trying too hard.
+      ldr_press();
+      spd=50;
+      //delay(500);
     }		
 }
 
