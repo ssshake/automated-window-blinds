@@ -8,6 +8,9 @@
 //This script can also be used with a tmp36 temperature sensor to tilt up when it's very hot out
 //Currently it will tilt up when it's very bright out, but ideally we want this do be done by temperature.
 //Written by Ssshake - Contact arduinocode@doobiest.net for help or to submit contributes to the code line.
+//All products developed by ssshake c/o homeawesomation is licensed under GPLv3.
+//You can view the license here: http://www.gnu.org/licenses/gpl-3.0.html
+
 #include <Servo.h>  
 
 
@@ -32,6 +35,11 @@ int prevstate = 0; //Keeps history of prior state
 //int sensorValue = 0;  // variable to store the value coming from the sensor
 int dest = 0;   // Servo destination depending on photocell reading
 int buttonpos =1; //Keep state of motion sensor/button for movement
+int manualmode =0;
+int time_base=0;
+int time_now;
+int time_diff;
+
 //ENABLE DEBUG
 int debug = 0; //Set this to 1 for serial debug output
 void setup(void) {
@@ -55,13 +63,14 @@ if(killswitch_value==HIGH) //IF kill switch isn't set then run main loop
 		  //debug and Serial.print(" | Pos: ");
 		  //debug and Serial.print(pos);    
 		  //debug and Serial.print(" | State: ");
-
+		time_now=millis();
 		//Define the modes based on how bright it is, and set corresponding servo position
 		if (photocellReading > 0 && photocellReading < 400) {
 				button_press();	
 //					debug and Serial.println("Night");
 				dest=180;      
 				state=1;
+				manualmode = 0;
 		}  
 
 		//After setting LDR position, hold until not longer within current threshold  
@@ -93,10 +102,12 @@ if(killswitch_value==HIGH) //IF kill switch isn't set then run main loop
 			button_press();	 
 		}
 		
-		if (state != prevstate){ //IF the photocell reading is different from last sample then execute servo controls
+		time_diff = time_now - time_base;
+		if (state != prevstate && time_diff > 60000 && manualmode == 0;){ //IF the photocell reading is different from last sample then execute servo controls
                         debug and Serial.print("State Change to ");
                         debug and Serial.println(state);
 			ldr_press();
+			time_base = millis();
 	 	}
 		prevstate = state; //Remember state so we can compare it again next round
 	}
@@ -155,6 +166,7 @@ void button_press(){
     //if(button_value==LOW || sensorValue < 900){  // button press
     if(button_value==LOW){  // button press
         spd=10;   // how fast should the servo move? 50 is quie
+		manualmode = 1;
 	debug and Serial.println("button press"); 
 //	debug and Serial.println(sensorValue);
 

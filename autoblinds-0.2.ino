@@ -4,6 +4,9 @@
 //This script can also be used with a tmp36 temperature sensor to tilt up when it's very hot out
 //Currently it will tilt up when it's very bright out, but ideally we want this do be done by temperature.
 //Written by Ssshake - Contact arduinocode@doobiest.net for help or to submit contributes to the code line.
+//All products developed by ssshake c/o homeawesomation is licensed under GPLv3.
+//You can view the license here: http://www.gnu.org/licenses/gpl-3.0.html
+
 #include <Servo.h>  
 Servo myservo;  // create servo object to control a servo 
                 // a maximum of eight servo objects can be created 
