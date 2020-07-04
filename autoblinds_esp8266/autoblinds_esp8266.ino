@@ -20,11 +20,11 @@ int prevstate = 0; //Keeps history of prior state
 int sensorValue = 0;  // variable to store the value coming from the sensor
 int dest = 0;   // Servo destination depending on photocell reading
 
-int debug = 0; //Set this to 1 for serial debug output
+int debug = 1; //Set this to 1 for serial debug output
 
 void loop(void) {
     
-    //handleBlindAutomation();
+    handleBlindAutomation();
     handleWebClients();
     ArduinoOTA.handle(); //port 8266
 }
@@ -167,6 +167,7 @@ void photocellStats(){
     Serial.print(" | Pos: ");
     Serial.print(pos);    
     Serial.print(" | State: ");
+    Serial.println(state);
 }
 
 void handleBlindAutomation(){
@@ -174,7 +175,7 @@ void handleBlindAutomation(){
     if (debug) {
       photocellStats();
     }
-    
+    return;
     if (photocellReading > 0 && photocellReading < 400) {
         debug and Serial.println("Night");
         dest=180;      
