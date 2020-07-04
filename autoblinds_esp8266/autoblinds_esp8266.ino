@@ -7,20 +7,20 @@
 
 WiFiServer server(80);
 
-int servoPin=5; //Input pin for servo
-int photocellPin = A0; // the cell and 10K pulldown are connected to a0
-int pos = 180;    // variable to store the servo position 
-int spd = 50;   // how fast should the servo move? 50 is quiet
+int servoPin=5;
+int photocellPin = A0;
+int pos = 180;
+int spd = 50;
 
 
-Servo myservo;  // create servo object to control a servo 
-int photocellReading; // the analog reading from the analog resistor divider
-int state = 0; //Keep track of state so we don't send signal to the servo without reason
-int prevstate = 0; //Keeps history of prior state
-int sensorValue = 0;  // variable to store the value coming from the sensor
-int dest = 0;   // Servo destination depending on photocell reading
+Servo myservo;
+int photocellReading;
+int state = 0;
+int prevstate = 0;
+int sensorValue = 0;
+int dest = 0;
 
-int debug = 1; //Set this to 1 for serial debug output
+int debug = 1;
 
 void loop(void) {
     
@@ -171,11 +171,17 @@ void photocellStats(){
 }
 
 void handleBlindAutomation(){
+  
     photocellReading = analogRead(photocellPin); //Query photo cell
+  
     if (debug) {
       photocellStats();
     }
+    
     return;
+
+
+    
     if (photocellReading > 0 && photocellReading < 400) {
         debug and Serial.println("Night");
         dest=180;      
@@ -210,38 +216,30 @@ void handleBlindAutomation(){
     prevstate = state;
 }
 
-void handleLightChange() { //This executes when the photocell readings have dictated
-	  debug and Serial.println("State Change");      
-	myservo.attach(servoPin);                     //Connect to servo
-	if (pos > dest){  // If the current position is great than the destination then we must subtract
-		while (pos > dest)  // Change current position to desired position, one degree at a time.
+void handleLightChange() {
+	debug and Serial.println("State Change");      
+	myservo.attach(servoPin);
+	if (pos > dest){
+		while (pos > dest)
 		{                                
-			  //debug and Serial.print("Was :");
-			  //debug and Serial.print(pos);
-			myservo.write(pos);         // tell servo to go to position in variable 'pos' 
-			delay(spd);                 // waits desired time for the servo to reach the position 
+			myservo.write(pos);
+			delay(spd);
 			pos--;
-			  //debug and Serial.print(" | Is :");
-			  //debug and Serial.println(pos);
 		} 
-		myservo.detach();                //Detach from Servo
+		myservo.detach();
 	} 
-	else {  // If the curren't position is greater than the destination then we must add
-		myservo.attach(9);  //Connect to servo
-		while (pos < dest)  // goes from 180 degrees to 0 degrees 
-		{                        
-			  //debug and Serial.print("Was :");
-			  //debug and Serial.print(pos);        
-			myservo.write(pos);             // tell servo to go to position in variable 'pos' 
-			delay(spd);                     // waits desired time for the servo to reach the position 
+	else {
+		myservo.attach(servoPin);
+		while (pos < dest)
+		{                         
+			myservo.write(pos);
+			delay(spd); 
 			pos++;
-			  //debug and Serial.print(" | Is :");
-			  //debug and Serial.println(pos);
 		} 
 	}
-	myservo.write(pos); // Doing a write out side of the loop because I had a feeling the last position value was being skipped. I think I'm wrong though
+	myservo.write(pos);
 	delay(spd);  
-	myservo.detach(); //Detach servo to keep it from humming on strain
+	myservo.detach();
 }
 
   
