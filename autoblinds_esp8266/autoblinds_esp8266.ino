@@ -4,6 +4,7 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ArduinoOTA.h>
+int debug = 0;
 
 WiFiServer server(80);
 
@@ -12,21 +13,130 @@ int photocellPin = A0;
 int pos = 180;
 int spd = 50;
 
-
 Servo myservo;
 int photocellReading;
+
+//questionable
 int state = 0;
 int prevstate = 0;
-int sensorValue = 0;
 int dest = 0;
+int lightBuffer = 20;
 
-int debug = 1;
+String stateNames[]       = { "night", "dusk", "day" };
+int stateUpperLimits[]    = { 400, 600, 1024 };
+int stateAngleInDegrees[] = { 180, 135, 85 };
 
-void loop(void) {
-    
-    handleBlindAutomation();
+int stateUpperLimitsSize = sizeof stateUpperLimits;
+String currentStateName = "";
+
+
+//new variables
+//handle without delay
+unsigned long previousMillis = 0;
+const long checkInterval = 1000;
+
+void loop(void) {  
     handleWebClients();
+    handleBlindAutomationWithoutDelay();
     ArduinoOTA.handle(); //port 8266
+}
+
+void handleBlindAutomationWithoutDelay(){
+  updateServoIfNecessary();
+  
+  if (!hasTimeoutPassed()){
+    updateStateFromLight();
+  }
+  
+}
+
+void updateServoIfNecessary(){
+  
+}
+
+void updateStateFromLight(){
+  photocellReading = analogRead(photocellPin);
+  photocellStats();
+  for (int i=0; i < stateUpperLimitsSize; i++) {
+      if ( photocellReading <= stateUpperLimits[i] ){
+          currentStateName = stateNames[i];
+          dest = stateAngleInDegrees[i];
+          prevstate = state;
+          state = i;
+          Serial.println("--> Found A State " + currentStateName + " " + state);
+          break;
+      }
+  }
+}
+
+bool hasTimeoutPassed(){
+  unsigned long currentMillis = millis();
+  bool answer;
+  
+  if (currentMillis - previousMillis >= checkInterval) {
+    answer = true;
+    previousMillis = currentMillis;
+  } else {
+    answer = false;  
+  }
+  
+  return answer;
+}
+
+void photocellStats(){
+    Serial.print("Light Reading :");
+    Serial.print(photocellReading); // the raw analog reading
+    Serial.print(" | Pos: ");
+    Serial.print(pos);    
+    Serial.print(" | State: ");
+    Serial.println(state);
+}
+
+void handleWebClients(){
+  // Check if a client has connected
+ 
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+ 
+  // Wait until the client sends some data
+  Serial.println("new client");
+  while(!client.available()){
+    delay(1);
+  }
+ 
+  // Read the first line of the request
+  String request = client.readStringUntil('\r');
+  Serial.println(request);
+  client.flush();
+ 
+  // Match the request
+ 
+  if (request.indexOf("/stats") != -1)  {
+    photocellStats();
+  }
+  if (request.indexOf("/LED=OFF") != -1)  {
+    Serial.println("low");
+  }
+  
+  // Return the response
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/html");
+  client.println(""); //  do not forget this one
+  client.println("<!DOCTYPE HTML>");
+  client.println("<html>");
+ 
+  client.print("Led pin is now: ");
+ 
+  client.println("<br><br>");
+  client.println("<a href=\"/LED=ON\"\"><button>Turn On </button></a>");
+  client.println("<a href=\"/LED=OFF\"\"><button>Turn Off </button></a><br />");  
+  client.println("</html>");
+ 
+  delay(1);
+  Serial.println("Client disonnected");
+  Serial.println("");  
 }
 
 void setup(void) {
@@ -111,65 +221,9 @@ void startWebServer(){
  
 }
 
-void handleWebClients(){
-  // Check if a client has connected
- 
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
- 
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){
-    delay(1);
-  }
- 
-  // Read the first line of the request
-  String request = client.readStringUntil('\r');
-  Serial.println(request);
-  client.flush();
- 
-  // Match the request
- 
-  if (request.indexOf("/stats") != -1)  {
-    photocellStats();
-  }
-  if (request.indexOf("/LED=OFF") != -1)  {
-    Serial.println("low");
-  }
- 
-// Set ledPin according to the request
-//digitalWrite(ledPin, value);
- 
-  // Return the response
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
- 
-  client.print("Led pin is now: ");
- 
-  client.println("<br><br>");
-  client.println("<a href=\"/LED=ON\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/LED=OFF\"\"><button>Turn Off </button></a><br />");  
-  client.println("</html>");
- 
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");  
-}
 
-void photocellStats(){
-    Serial.print("Light Reading :");
-    Serial.print(photocellReading); // the raw analog reading
-    Serial.print(" | Pos: ");
-    Serial.print(pos);    
-    Serial.print(" | State: ");
-    Serial.println(state);
-}
 
+/////////////////////////////////////////////////////////////////////////////
 void handleBlindAutomation(){
   
     photocellReading = analogRead(photocellPin); //Query photo cell
@@ -218,15 +272,23 @@ void handleBlindAutomation(){
 
 void handleLightChange() {
 	debug and Serial.println("State Change");      
+ 
 	myservo.attach(servoPin);
+	
 	if (pos > dest){
+	
 		while (pos > dest)
+		
 		{                                
+		
 			myservo.write(pos);
 			delay(spd);
 			pos--;
+
 		} 
+
 		myservo.detach();
+
 	} 
 	else {
 		myservo.attach(servoPin);
