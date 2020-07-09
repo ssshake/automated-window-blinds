@@ -21,6 +21,8 @@ int state = 0;
 int prevstate = 0;
 int dest = 0;
 int lightBuffer = 20;
+int noStateChangeInterval = 4000;
+int lastStateChangeTimestamp = 0;
 
 String stateNames[]       = { "night", "dusk", "day" };
 int stateUpperLimits[]    = { 400, 600, 1024 };
@@ -36,7 +38,7 @@ unsigned long previousMillis = 0;
 const long checkInterval = 1000;
 
 unsigned long previousNextPositionMillis = 0;
-const long nextPositionInterval = 100;
+const long nextPositionInterval = 50;
 
 void loop(void) {  
     handleWebClients();
@@ -50,24 +52,27 @@ void handleBlindAutomationWithoutDelay(){
     updateServo();
   }
   
-  if (hasCheckTimeoutPassed()){
+  if (hasCheckTimeoutPassed() && hasStateChangeTimeoutPassed() && pos == dest){
     updateStateFromLight();
   }
   
 }
 
 void updateServo(){
-//  if (pos == dest) {
-//    return;
-//  }
+  if (pos == dest) {
+    myservo.detach();
+    return;
+  }
 
   if (pos < dest) {
+    myservo.attach(servoPin);
     pos++;
     myservo.write(pos);
     return;
   }
   
   if (pos > dest) {
+    myservo.attach(servoPin);
     pos--;
     myservo.write(pos);
     return;
@@ -78,13 +83,23 @@ void updateStateFromLight(){
   photocellReading = analogRead(photocellPin);
   photocellStats();
   for (int i=0; i < stateUpperLimitsSize; i++) {
+
+      
       if ( photocellReading <= stateUpperLimits[i] ){
-          currentStateName = stateNames[i];
-          dest = stateAngleInDegrees[i];
-          prevstate = state;
-          state = i;
-          Serial.println("--> Found A State " + currentStateName + " " + state + ", Angle " + dest);
+          Serial.println("--> Found A State ");
+
+          //if the state didnt change dont update anything
+          if (i != prevstate){
+            Serial.println("--> State updated");
+            lastStateChangeTimestamp = millis();
+            currentStateName = stateNames[i];
+            dest = stateAngleInDegrees[i];
+            prevstate = state;
+            state = i;
+          }
+
           break;
+          
       }
   }
 }
@@ -115,6 +130,22 @@ bool hasCheckTimeoutPassed(){
   }
   
   return answer;
+}
+
+bool hasStateChangeTimeoutPassed(){
+  Serial.println("hasStateChangeTimeoutPassed");
+  unsigned long currentMillis = millis();
+  bool answer;
+  
+  if (currentMillis - lastStateChangeTimestamp >= noStateChangeInterval) {
+    Serial.println("State change interval has passed");
+    answer = true;
+  } else {
+    Serial.println("hasStateChangeTimeoutPassed ==== false");
+    answer = false;  
+  }
+  
+  return answer;  
 }
 
 void photocellStats(){
@@ -150,8 +181,13 @@ void handleWebClients(){
   if (request.indexOf("/stats") != -1)  {
     photocellStats();
   }
-  if (request.indexOf("/LED=OFF") != -1)  {
-    Serial.println("low");
+  if (request.indexOf("/STATE=0") != -1)  {
+    Serial.println("closed");
+    dest=180;
+  }
+  if (request.indexOf("/STATE=2") != -1)  {
+    Serial.println("open");
+    dest=0;
   }
   
   // Return the response
@@ -161,11 +197,12 @@ void handleWebClients(){
   client.println("<!DOCTYPE HTML>");
   client.println("<html>");
  
-  client.print("Led pin is now: ");
+  client.print("Blinds are now ");
  
   client.println("<br><br>");
-  client.println("<a href=\"/LED=ON\"\"><button>Turn On </button></a>");
-  client.println("<a href=\"/LED=OFF\"\"><button>Turn Off </button></a><br />");  
+  client.println("<a href=\"/STATE=0\"\"><button>Closed</button></a>");
+  client.println("<a href=\"/STATE=2\"\"><button>Open</button></a><br />");  
+  client.println("<a href=\"/stats\"\"><button>Serial Stats</button></a><br />");  
   client.println("</html>");
  
   delay(1);
@@ -181,8 +218,9 @@ void setupServo(){
     delay(1000);    
     myservo.write(100);
     myservo.detach();  
-    delay(1000);    
-    myservo.attach(servoPin);
+    delay(1000);
+    pos = 100;
+    dest = 100;
 }
 
 void setupWifi(){
@@ -267,88 +305,4 @@ void startWebServer(){
   Serial.println("/");
  
 }
-
-
-
-/////////////////////////////////////////////////////////////////////////////
-void handleBlindAutomation(){
-  
-    photocellReading = analogRead(photocellPin); //Query photo cell
-  
-    if (debug) {
-      photocellStats();
-    }
-    
-    return;
-
-
-    
-    if (photocellReading > 0 && photocellReading < 400) {
-        debug and Serial.println("Night");
-        dest=180;      
-        state=1;
-    }  
-
-    else if ( photocellReading > 400 && photocellReading < 600) { 
-        debug and Serial.println("Dusk");
-        dest=135;      
-        state=2; 
-    }
-
-    else if (photocellReading > 600 && photocellReading < 950) {
-        debug and Serial.println("Day");
-        dest=85;
-        state=3;
-    }
-
-    else if (photocellReading > 950 && photocellReading < 1023) {
-        debug and Serial.println("Very Bright Day");
-        dest=20;
-        state=4;
-    } 
-    else {
-      debug and Serial.println(photocellReading); 
-      debug and Serial.println("Not in range"); 
-    }
-    
-    if (state != prevstate){
-      handleLightChange();
-    }
-    prevstate = state;
-}
-
-void handleLightChange() {
-	debug and Serial.println("State Change");      
- 
-	myservo.attach(servoPin);
-	
-	if (pos > dest){
-	
-		while (pos > dest)
-		
-		{                                
-		
-			myservo.write(pos);
-			delay(spd);
-			pos--;
-
-		} 
-
-		myservo.detach();
-
-	} 
-	else {
-		myservo.attach(servoPin);
-		while (pos < dest)
-		{                         
-			myservo.write(pos);
-			delay(spd); 
-			pos++;
-		} 
-	}
-	myservo.write(pos);
-	delay(spd);  
-	myservo.detach();
-}
-
   
