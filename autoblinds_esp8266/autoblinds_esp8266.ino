@@ -35,6 +35,9 @@ String currentStateName = "";
 unsigned long previousMillis = 0;
 const long checkInterval = 1000;
 
+unsigned long previousNextPositionMillis = 0;
+const long nextPositionInterval = 100;
+
 void loop(void) {  
     handleWebClients();
     handleBlindAutomationWithoutDelay();
@@ -42,16 +45,33 @@ void loop(void) {
 }
 
 void handleBlindAutomationWithoutDelay(){
-  updateServoIfNecessary();
+
+  if (hasServoTimeoutPassed()){
+    updateServo();
+  }
   
-  if (!hasTimeoutPassed()){
+  if (hasCheckTimeoutPassed()){
     updateStateFromLight();
   }
   
 }
 
-void updateServoIfNecessary(){
+void updateServo(){
+//  if (pos == dest) {
+//    return;
+//  }
+
+  if (pos < dest) {
+    pos++;
+    myservo.write(pos);
+    return;
+  }
   
+  if (pos > dest) {
+    pos--;
+    myservo.write(pos);
+    return;
+  }  
 }
 
 void updateStateFromLight(){
@@ -63,13 +83,27 @@ void updateStateFromLight(){
           dest = stateAngleInDegrees[i];
           prevstate = state;
           state = i;
-          Serial.println("--> Found A State " + currentStateName + " " + state);
+          Serial.println("--> Found A State " + currentStateName + " " + state + ", Angle " + dest);
           break;
       }
   }
 }
 
-bool hasTimeoutPassed(){
+bool hasServoTimeoutPassed(){
+  unsigned long currentMillis = millis();
+  bool answer;
+  
+  if (currentMillis - previousNextPositionMillis >= nextPositionInterval) {
+    answer = true;
+    previousNextPositionMillis = currentMillis;
+  } else {
+    answer = false;  
+  }
+  
+  return answer;
+}
+
+bool hasCheckTimeoutPassed(){
   unsigned long currentMillis = millis();
   bool answer;
   
@@ -139,19 +173,28 @@ void handleWebClients(){
   Serial.println("");  
 }
 
-void setup(void) {
-    
+void setupServo(){
+    myservo.attach(servoPin);
+    myservo.write(180);
+    delay(1000);
+    myservo.write(0);
+    delay(1000);    
+    myservo.write(100);
+    myservo.detach();  
+    delay(1000);    
+    myservo.attach(servoPin);
+}
+
+void setupWifi(){
     WiFiManager wifiManager;
     wifiManager.autoConnect("HomeAwesomation");
-    
-    Serial.begin(9600); //Comment out this line if you don't want debugging enabled    
-    
-    myservo.attach(servoPin);
-
     startWebServer();
- 
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());    
+}
 
-    ArduinoOTA.setPort(8266);
+void setupOTA(){
+ArduinoOTA.setPort(8266);
 
     ArduinoOTA.setHostname("homeawesomation");
     
@@ -190,13 +233,17 @@ void setup(void) {
       }
     });
 
-    ArduinoOTA.begin();
+    ArduinoOTA.begin();  
+}
+
+void setup(void) {
+    Serial.begin(9600); //Comment out this line if you don't want debugging enabled    
+
+    setupServo();
+    setupWifi();
+    setupOTA();
     
     Serial.println("Ready");
-    
-    Serial.print("IP address: ");
-    
-    Serial.println(WiFi.localIP());
 }
 
 void startWebServer(){
