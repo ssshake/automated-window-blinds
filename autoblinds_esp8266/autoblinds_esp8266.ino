@@ -4,22 +4,21 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ArduinoOTA.h>
+
 int debug = 0;
 
 WiFiServer server(80);
 
 int servoPin=5;
 int photocellPin = A0;
-int pos = 180;
-int spd = 50;
 
 Servo myservo;
 int photocellReading;
 
-//questionable
 int state = 0;
 int prevstate = 0;
 int dest = 0;
+int pos = 180;
 int lightBuffer = 20;
 int noStateChangeInterval = 4000;
 int lastStateChangeTimestamp = 0;
@@ -31,22 +30,35 @@ int stateAngleInDegrees[] = { 180, 135, 85 };
 int stateUpperLimitsSize = sizeof stateUpperLimits;
 String currentStateName = "";
 
-
-//new variables
-//handle without delay
 unsigned long previousMillis = 0;
 const long checkInterval = 1000;
 
 unsigned long previousNextPositionMillis = 0;
 const long nextPositionInterval = 50;
 
-void loop(void) {  
-    handleWebClients();
-    handleBlindAutomationWithoutDelay();
-    ArduinoOTA.handle(); //port 8266
+
+void setup(void) {
+    Serial.begin(9600);
+
+    setupServo();
+    setupWifi();
+    setupOTA();
+    
+    Serial.println("Ready");
 }
 
-void handleBlindAutomationWithoutDelay(){
+
+
+void loop(void) {  
+    handleWebClients();
+    handleBlindAutomationNonBlocking();
+    ArduinoOTA.handle();
+}
+
+
+
+
+void handleBlindAutomationNonBlocking(){
 
   if (hasServoTimeoutPassed()){
     updateServo();
@@ -272,16 +284,6 @@ ArduinoOTA.setPort(8266);
     });
 
     ArduinoOTA.begin();  
-}
-
-void setup(void) {
-    Serial.begin(9600); //Comment out this line if you don't want debugging enabled    
-
-    setupServo();
-    setupWifi();
-    setupOTA();
-    
-    Serial.println("Ready");
 }
 
 void startWebServer(){
