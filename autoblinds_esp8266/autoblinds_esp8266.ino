@@ -165,7 +165,9 @@ void photocellStats(){
     Serial.print(photocellReading); // the raw analog reading
     Serial.print(" | Pos: ");
     Serial.print(pos);    
-    Serial.print(" | State: ");
+    Serial.print(" | Dest: ");
+    Serial.print(dest);    
+    Serial.print(" | State: ");    
     Serial.println(state);
 }
 
